@@ -15,9 +15,9 @@ on:
         type: boolean
         default: true
       disable_lto:
-        description: "Disable LTO (faster link, different perf profile)"
+        description: "Disable LTO. Default on because a 14 GB runner cannot link LTO."
         type: boolean
-        default: false
+        default: true
 
 permissions:
   contents: read
@@ -90,6 +90,12 @@ jobs:
           rustup show
           rustc --version
 
+      - name: Install GNU tar
+        run: |
+          # surfer download shells out to GNU tar to unpack the Firefox
+          # source tarball on macOS. The runner image ships BSD tar only.
+          command -v gtar || brew install gnu-tar
+
       - name: Install npm dependencies
         run: npm ci --no-audit --no-fund
 
@@ -112,10 +118,10 @@ jobs:
           ZEN_GA_DISABLE_PGO: "1"
           ZEN_DISABLE_BOOTSTRAP: "1"
           ZEN_DISABLE_LTO: ${{ inputs.disable_lto && '1' || '' }}
-          MOZ_MAKE_FLAGS: "-j3"
         run: |
           set -x
-          npm run build
+          df -h /
+          npm run build -- -j 3
 
       - name: Package app bundle
         run: |
