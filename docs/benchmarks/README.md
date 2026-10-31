@@ -37,14 +37,19 @@ project brief. Nothing in this directory is shipped to users.
 docs/benchmarks/
   README.md          # this file
   baseline.md        # M0 baseline numbers and raw samples
-  raw/               # per-run JSON/CSV, committed only when small
+  raw/               # per-run JSON, committed only when small
 scripts/bench/
   README.md
+  lib.sh             # RSS tree, profile dirs, result envelope
+  window_wait.swift  # first on-screen window timer, compiled on demand
   startup.sh         # cold/warm launch series
   memory.sh          # RSS sampling at 1/20/50 tabs
-  latency.py         # command bar / space switch / split, via Marionette
-  probe/             # optional pref-gated instrumentation (off by default)
+  fixture.html       # deterministic page for the memory test
 ```
+
+The three latency metrics will need a harness that does not exist yet. It is
+intentionally absent: it depends on pref-gated instrumentation
+(`zen.benchmark.enabled=false`) that has not been approved.
 
 ## Known limitations
 
