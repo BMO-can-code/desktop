@@ -128,7 +128,15 @@ jobs:
           set -ex
           cd engine
           ./mach package
-          APP="$(find obj-*/dist -maxdepth 3 -name '*.app' -type d | head -1)"
+          # mach package puts the browser app in dist/ or dist/<brand>/. Pick it
+          # explicitly; the naive glob returns helper apps first.
+          APP="$(find obj-*/dist -maxdepth 3 -name 'Nightly.app' -o -name 'Zen.app' | head -1)"
+          if [ -z "$APP" ]; then
+            APP="$(find obj-*/dist -maxdepth 4 -path '*/dist/*Nightly.app' -o -path '*/dist/*Zen.app' | head -1)"
+          fi
+          if [ -z "$APP" ]; then
+            APP="$(find obj-*/dist -maxdepth 3 -name '*.app' -type d | grep -v plugin-container | grep -v updater.app | grep -v gpu-helper | head -1)"
+          fi
           test -n "$APP"
           echo "APP=$APP"
           du -sh "$APP"
