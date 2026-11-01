@@ -43,11 +43,12 @@ path, and the decisions that must be made before M1 writes product code.
 | Engine patch register | `engine-patches.md` | done |
 | Network call inventory | `network-calls.md` | done |
 | Branding inventory | `branding-inventory.md` | done |
-| ADRs | `decisions/ADR-0001..0008` | done (proposed where noted) |
+| ADRs | `decisions/ADR-0001..0008` | done (accepted per decisions) |
 | QA process and matrix | `qa/` | done |
-| Benchmark harness | `scripts/bench/` | done, smoke-tested |
-| Baseline numbers | `benchmarks/baseline.md` | pending CI artifact |
-| CI build | `.github/workflows/m0-baseline-macos.yml` | pending |
+| Benchmark harness | `scripts/bench/` | done |
+| Baseline numbers | `benchmarks/baseline.md` | pending CI artifact (Twilight v0 partial) |
+| CI build | `.github/workflows/m0-baseline-macos.yml` | workflow fixed; Actions disabled for repo (org policy) |
+| Removed-hostname grep gate | `scripts/check-removed-hostnames.sh` | passing |
 
 ## What M0 deliberately did not do
 

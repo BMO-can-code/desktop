@@ -126,22 +126,47 @@ jobs:
       - name: Package app bundle
         run: |
           set -ex
+          EXPECTED_BUNDLE_ID="app.zen-browser"
+          EXPECTED_BINARY="zen"
           cd engine
           ./mach package
-          # mach package puts the browser app in dist/ or dist/<brand>/. Pick it
-          # explicitly; the naive glob returns helper apps first.
-          APP="$(find obj-*/dist -maxdepth 3 -name 'Nightly.app' -o -name 'Zen.app' | head -1)"
-          if [ -z "$APP" ]; then
-            APP="$(find obj-*/dist -maxdepth 4 -path '*/dist/*Nightly.app' -o -path '*/dist/*Zen.app' | head -1)"
+          MAPFILE="/tmp/app_candidates.txt"
+          rm -f "$MAPFILE"
+          find obj-*/dist -maxdepth 4 -name '*.app' -type d | while read -r cand; do
+            bin="$(basename "$(find "$cand/Contents/MacOS" -maxdepth 1 -type f -perm +111 2>/dev/null | head -1)")"
+            bid="$(/usr/libexec/PlistBuddy -c "Print :CFBundleIdentifier" "$cand/Contents/Info.plist" 2>/dev/null || echo "")"
+            echo "$cand|$bin|$bid" >> "$MAPFILE"
+          done
+          MATCHES=$(grep "|${EXPECTED_BINARY}|" "$MAPFILE" | grep "|${EXPECTED_BUNDLE_ID}$" || true)
+          COUNT=$(echo "$MATCHES" | grep -c "^" || echo 0)
+          if [ "$COUNT" -ne 1 ]; then
+            echo "ERROR: expected exactly 1 match, got $COUNT" >&2
+            cat "$MAPFILE" >&2
+            exit 1
           fi
-          if [ -z "$APP" ]; then
-            APP="$(find obj-*/dist -maxdepth 3 -name '*.app' -type d | grep -v plugin-container | grep -v updater.app | grep -v gpu-helper | head -1)"
-          fi
-          test -n "$APP"
+          APP=$(echo "$MATCHES" | cut -d'|' -f1)
+          test -n "$APP" && test -d "$APP"
+          BIN="$APP/Contents/MacOS/$EXPECTED_BINARY"
+          test -f "$BIN" && test -x "$BIN"
           echo "APP=$APP"
           du -sh "$APP"
+          codesign --force --deep --sign - "$APP" || true
+          codesign --verify --deep --strict "$APP" || true
+          plutil -lint "$APP/Contents/Info.plist"
           ditto -c -k --sequesterRsrc --keepParent "$APP" "$GITHUB_WORKSPACE/zen-stock-dev-arm64.zip"
           ls -lh "$GITHUB_WORKSPACE/zen-stock-dev-arm64.zip"
+          unzip -l "$GITHUB_WORKSPACE/zen-stock-dev-arm64.zip" | grep "Contents/MacOS/$EXPECTED_BINARY" | head -1
+          TMPD="/tmp/verify_art"
+          rm -rf "$TMPD" && mkdir -p "$TMPD" && cd "$TMPD" && ditto -x -k "$GITHUB_WORKSPACE/zen-stock-dev-arm64.zip" . >/dev/null && find . -name '*.app' -path "*$EXPECTED_BINARY*" -not -path "*plugin-container*" | head -1 && ./*/Contents/MacOS/$EXPECTED_BINARY --version 2>&1 | head -1
+          BID=$(/usr/libexec/PlistBuddy -c "Print :CFBundleIdentifier" "$APP/Contents/Info.plist")
+          VER=$(/usr/libexec/PlistBuddy -c "Print :CFBundleShortVersionString" "$APP/Contents/Info.plist")
+          ARCHS=$(lipo -archs "$BIN")
+          SHA256=$(shasum -a 256 "$GITHUB_WORKSPACE/zen-stock-dev-arm64.zip" | awk '{print $1}')
+          SIZE=$(stat -f%z "$GITHUB_WORKSPACE/zen-stock-dev-arm64.zip")
+          cat > "$GITHUB_WORKSPACE/artifact-manifest.json" << EOF
+          {"bundle_id":"$BID","version":"$VER","binary":"$EXPECTED_BINARY","archs":"$ARCHS","size_bytes":$SIZE,"sha256":"$SHA256"}
+          EOF
+          cat "$GITHUB_WORKSPACE/artifact-manifest.json"
 
       - name: Report artifacts
         run: |

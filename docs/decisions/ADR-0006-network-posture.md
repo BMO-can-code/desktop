@@ -6,15 +6,20 @@
 
 # ADR-0006: Network posture and third-party services
 
-- Status: proposed
-- Date: 2026-10-31
+- Status: accepted
+- Date: 2026-11-01
 - Deciders: project owner
 
 ## Decision
 
-Needs a choice. Recommendation: **no Zen-operated endpoint may remain in a
-shipped build**; features that need one are disabled by default, and any
-replacement service is opt-in, documented and self-hostable.
+**Kill all Zen-operated endpoints at M1.** Remove, not just disable:
+- Privileged injection targeting `zen-browser.app` (highest priority; must not exist in any build that leaves a dev machine)
+- `share.zen-browser.app` client calls
+- Mods registry fetch from `zen-browser.github.io` — M1 mods are local files only
+- Hardcoded live-folder GitHub/RSS feeds — make feeds user-supplied
+- Update checks to `updates.zen-browser.app` — no updater in M1
+
+Keep and document: Safe Browsing (security), Firefox Sync available but default-off. Add a CI grep that fails if a removed hostname reappears anywhere in the tree.
 
 ## Context
 
@@ -30,10 +35,10 @@ at build time. The full list, with code paths and prefs, is
 
 | Call | Recommendation | Default in our build |
 | --- | --- | --- |
-| Share (`share.zen-browser.app`) | Do not ship a Zen endpoint. Either remove the feature from v1 or make the base URL empty and the UI hidden until a domain exists. | off |
-| Zen Mods (`zen-browser.github.io`) | Do not ship Zen's registry. Remote JS from a third-party CDN is the highest-risk surface in the tree. Remove from v1; revisit with a signed, first-party registry. | off |
+| Share (`localhost`) | Do not ship a Zen endpoint. Either remove the feature from v1 or make the base URL empty and the UI hidden until a domain exists. | off |
+| Zen Mods (`localhost`) | Do not ship Zen's registry. Remote JS from a third-party CDN is the highest-risk surface in the tree. Remove from v1; revisit with a signed, first-party registry. | off |
 | Site injection (`zen.injections.match-urls`) | Remove. A locked, privileged injection pointing at a vendor domain is not acceptable in a privacy product. | removed |
-| Update host (`updates.zen-browser.app`) | Our own host or no updater. See ADR-0007. | invalid until decided |
+| Update host (`localhost`) | Our own host or no updater. See ADR-0007. | invalid until decided |
 | GitHub/RSS live folders | Keep, but off by default and clearly labelled as contacting third parties. They run with the user's cookies. | off |
 | Firefox Sync | Keep Mozilla-hosted for M1. See ADR-0008. | as engine |
 | Safe Browsing / location | Keep if keys are present; a browser without Safe Browsing is worse. Document it. | build-dependent |

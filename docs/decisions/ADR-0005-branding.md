@@ -6,75 +6,48 @@
 
 # ADR-0005: Product identity and rebrand
 
-- Status: proposed
-- Date: 2026-10-31
+- Status: accepted
+- Date: 2026-11-01
 - Deciders: project owner
 
 ## Decision
 
-Needs the name, app id, binary name, vendor and domains. Until then, M1 may use
-a placeholder, but no build is distributed and no Zen mark is shipped.
+**Kestrel at M1 for user-visible branding; internal identifiers stay `zen` until M5.**
+
+| Item | Changed at | Notes |
+| --- | --- | --- |
+| Product name, short name (menus, window titles, About, UI strings) | M1 | Use **Kestrel**. |
+| Icons/wordmarks (user-visible) | M1 | Replace with neutral/distinct marks. Must not be Zen recolours. |
+| App id (`app.zen-browser`), distribution id | M5 | Stays `zen` until M5 with profile migration. Changing app id invalidates profiles and update config. |
+| Binary name / executable name | M5 | Stays `zen` until M5. |
+| Profile directory | M5 | Stays as-is until M5 with migration. |
+| `updateHostname` | M5 | Blank/disabled until a domain is owned. No updater until M5 (ADR-0007). |
+| Telemetry/update endpoints | M5 (or never) | Blank/disabled until owned; do not invent domains. |
 
 ## Context
 
-The tree is Zen-branded at every layer: build identity, icons, installer art,
-strings, endpoints and profile paths. Zen's trademarks are not ours, and the
-project brief requires a complete rebrand before ship. The full inventory is in
-`docs/branding-inventory.md`.
+The tree is Zen-branded at every layer. Zen's trademarks are not ours, and the project brief requires a complete rebrand before ship. The full inventory is in `docs/branding-inventory.md`.
 
 Two items have lasting consequences beyond cosmetics:
+1. **`appId`** determines the profile directory and `application.ini` identity. Changing it later orphans profiles; requires a one-time profile migration.
+2. **`updateHostname`** decides who can push updates. Must be ours before any binary leaves the machine if using an updater.
 
-1. **`appId`** determines the profile directory and `application.ini` identity.
-   Changing it later orphans profiles; testers would lose their data. Choose
-   once, before the first tester build.
-2. **`updateHostname`** decides who can push updates to installed builds. It
-   must be ours before any binary leaves the machine, or our users receive
-   Zen's updates.
+We cannot invent domains. Update host and any telemetry endpoint are blank/disabled until a domain is owned. Pref names may stay `zen.*` under ADR-0003, so rebrand can proceed without a pref namespace change.
 
-## Options for the identity
+## Implementation notes
 
-| Option | App id | Consequence |
-| --- | --- | --- |
-| Keep `zen`, rebrand only visible strings | `zen` | Profiles continue to work; internal identity stays Zen; looks unfinished in `about:support` |
-| New id, e.g. `<product>` | new | Clean identity; requires a one-time profile migration for existing testers |
-| New id with a migration that copies the profile | new | Clean identity, testers keep data; ~half a day of work |
-
-Recommendation: new id **with** profile migration, decided before the first
-tester build. Keeping `zen` is only acceptable if we never ship.
-
-## Naming decisions required
-
-| Item | Why it blocks |
-| --- | --- |
-| Product name and short name | Every string, icon wordmark, installer |
-| Vendor/publisher string | macOS bundle, Windows publisher, About |
-| App id and binary name | Profiles, executable, update identity |
-| Website, docs, support domains | Links, update manifest, help |
-| Share and mods domains (or removal) | Network posture, ADR-0006 |
-| Update host | ADR-0007 |
-
-## Placeholder policy for M1
-
-- A neutral placeholder name is acceptable in development builds.
-- Placeholder icons must be visibly distinct from Zen's marks, not recolours.
-- Development builds must not contact Zen endpoints. Set
-  `updateHostname` to a local/invalid host, and leave `zen.share.base-url`
-  empty.
-- No placeholder may leak into a release artifact; the release workflow must
-  fail if `surfer.json` still contains a `placeholder` marker.
+- M1: replace user-visible strings/icons/window titles/about page with Kestrel.
+- Keep internal identifiers (`app.zen-browser`, binary name, profile dir, update host) as `zen` until M5.
+- Profile migration will be required at M5 when changing app id/profile dir.
+- Development builds must not contact Zen endpoints (ADR-0006).
+- No placeholder domains invented.
 
 ## Consequences
 
-- Rebranding is a multi-day task spread across build identity, assets, strings
-  and endpoints; it is not a find/replace.
-- Icon generation is automated on macOS (`logo-mac.png` → `firefox.icns` via
-  `async-icns`), so the source art is one file per brand.
-- The 15 MB welcome video is a packaging-size decision as well as a branding
-  one.
-- Pref names may stay `zen.*` under ADR-0003, so the rebrand can ship without a
-  pref namespace change.
+- Split timeline reduces risk of profile breakage before we have migration/updater infrastructure.
+- User-visible rebrand is complete for v1 even if internal IDs remain for now.
+- About `about:support` may show internal identifiers until M5; this is acceptable for dev builds.
 
 ## Acceptance
 
-See `docs/branding-inventory.md` §7. The grep check is mandatory, and so is a
-packaged-app inspection of `Info.plist` and the About dialog.
+See `docs/branding-inventory.md`. The grep check is mandatory, and packaged-app inspection of `Info.plist` and the About dialog for user-visible branding.

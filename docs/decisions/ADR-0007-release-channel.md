@@ -6,19 +6,17 @@
 
 # ADR-0007: Update channel, signing and distribution
 
-- Status: proposed
-- Date: 2026-10-31
+- Status: accepted
+- Date: 2026-11-01
 - Deciders: project owner
 
 ## Decision
 
-Needs a choice. Recommendation: **no updater in M1**. Development and tester
-builds are manually distributed and unsigned; signing, notarisation and an
-update service are decided before the first public build.
+**None until M5. M1–M4 artifacts are unsigned dev builds with ad-hoc signing so they launch.** Document the quarantine-removal step. At **M5**: Developer ID + notarization + signed DMG, manual releases. Defer AUS/MAR until there is a release cadence. Apple Developer ID costs **$99/yr**.
 
 ## Context
 
-`surfer.json` sets `updateHostname: updates.zen-browser.app`, and the engine's
+`surfer.json` sets `updateHostname: localhost`, and the engine's
 AUS client will happily use it. That means an installed build checks Zen's
 server and, if a manifest matches, replaces itself with a Zen build. This is
 the single most dangerous inherited default.

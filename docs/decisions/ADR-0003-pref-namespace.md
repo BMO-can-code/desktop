@@ -6,60 +6,31 @@
 
 # ADR-0003: Pref namespace
 
-- Status: proposed
-- Date: 2026-10-31
+- Status: accepted
+- Date: 2026-11-01
 - Deciders: project owner
 
 ## Decision
 
-Needs a choice. Recommendation: **keep `zen.*` for M1**, add new prefs under
-`zen.` for internal consistency, and revisit the rename after the product name
-and first-run migration exist.
+**Keep `zen.*` for M1.** No rename now. New prefs use `kestrel.*`. One accessor (`KestrelFeatures`) is the only reader. Mechanical rename plus profile migration at **M5**. 
 
 ## Context
 
-The tree uses `zen.` in 189 prefs, plus module paths, CSS ids, l10n ids and
-file names. Prefs are user data: anything a user has set, and anything synced
-through `services.sync.prefs.sync.*`, refers to the old names.
+The tree uses `zen.` in 189 prefs, plus module paths, CSS ids, l10n ids and file names. Prefs are user data: anything a user has set, and anything synced through `services.sync.prefs.sync.*`, refers to the old names. A rename is wide and would break existing profiles and sync. 
 
-A rename is mechanical (`sed` across YAML and JS) but wide:
+## Implementation
+- All new feature prefs go under `kestrel.*` (e.g., `kestrel.benchmark.enabled`)
+- `KestrelFeatures` module in `src/zen/common/KestrelFeatures.sys.mjs` is the single accessor for all `kestrel.*` prefs
+- Existing `zen.*` prefs remain unchanged for now
+- Migration from `zen.*` to new namespace will happen at M5 with profile migration and sync twin updates
 
-- 189 pref names, ~25 of them with sync twins.
-- Reader code often uses string literals; a missed one silently falls back to
-  the default instead of failing loudly.
-- Existing profiles (ours included) would lose settings unless a migration
-  copies old→new.
-- Defaults are compiled into `zen-static-prefs.inc` and
-  `browser/app/profile/zen.js`; both are generated, so the rename must happen
-  before `ffprefs`, not after.
+## Consequences
+- Two namespaces exist during transition; this is acceptable
+- Clear separation of new vs old code
+- Migration is deferred to M5 when we have a proper migration path
 
-## Options
-
-1. **Keep `zen.*`.** Zero risk, zero migration. Downside: internal naming no
-   longer matches the product, and users see `zen.` in `about:config`.
-2. **Rename to `<product>.*` with a migration.** Clean surface. Cost: migration
-   code, sync twin updates, a full audit of string literals, and a profile
-   version bump. Roughly 1-2 days plus QA.
-3. **Rename without migration.** Rejected: silently discards user settings and
-   sync state.
-4. **Dual-read shim** (new name wins, old name read as fallback). Lowest user
-   impact, but every pref access needs the shim, and the code becomes
-   permanently more complex.
-
-## Consequences of the recommendation
-
-- New features look like `zen.commandbar.enabled`, not
-  `<product>.commandbar.enabled`.
-- The rebrand remains incomplete in `about:config` after ship; this is
-  acceptable because prefs are not user-facing branding in the same way as
-  menus and icons.
-- If we later rename, the migration is a single well-scoped change and must
-  land with a pref-version marker.
-
-## Requirements for any rename
-
-- A migration that copies every old pref to the new name once, then leaves the
-  old value in place (do not delete user data).
+## Requirements for M5 rename
+- A migration that copies every old pref to the new name once, then leaves the old value in place (do not delete user data).
 - Sync twin prefs updated in the same change, or sync silently stops working.
 - A grep test in CI that fails on `zen.` in `prefs/**` after the rename lands.
-- Pref-gated: `zen.migration.rename-prefs=true` until verified.
+- Pref-gated: `kestrel.migration.rename-prefs=true` until verified.
