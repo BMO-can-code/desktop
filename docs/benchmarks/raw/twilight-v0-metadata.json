@@ -1,0 +1,16 @@
+{
+  "app": "/Applications/Twilight.app",
+  "binary": "/Applications/Twilight.app/Contents/MacOS/zen",
+  "archs": ["x86_64", "arm64"],
+  "arch_tested": "arm64",
+  "arch_method": "arch -arm64 (measurement via harness)",
+  "version": "Mozilla Zen 1.25t",
+  "machine": {
+    "model": "MacBook Pro (M-series)",
+    "os": "macOS 27.2"
+  },
+  "power": "Battery Power (88%, discharging)",
+  "thermal": "no warnings",
+  "warm_from_previous": false,
+  "caveat": "Twilight universal vs our arm64-thin is not a comparison axis; only arm64-slice vs arm64-thin counts."
+}

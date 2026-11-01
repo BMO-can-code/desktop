@@ -1,0 +1,67 @@
+{
+  "kind": "startup",
+  "recorded_at": "2026-11-01T07:26:58Z",
+  "git_sha": "eaa71bbac357fc7b538ea33d61979e676d564bb2",
+  "machine": {
+    "model": "Mac15,12",
+    "cpu": "Apple M3",
+    "cores": 8,
+    "memory_bytes": 8589934592,
+    "os": "27.2",
+    "arch": "arm64"
+  },
+  "data": {
+    "metric": "spawn_to_first_window",
+    "runs": [
+      {
+        "run": 1,
+        "profile": "fresh",
+        "ms": 3831.7
+      },
+      {
+        "run": 2,
+        "profile": "reused",
+        "ms": 8814.3
+      },
+      {
+        "run": 3,
+        "profile": "reused",
+        "ms": 2812.1
+      },
+      {
+        "run": 4,
+        "profile": "reused",
+        "ms": 2230.6
+      },
+      {
+        "run": 5,
+        "profile": "reused",
+        "ms": 2195.9
+      },
+      {
+        "run": 6,
+        "profile": "reused",
+        "ms": 2131.2
+      },
+      {
+        "run": 7,
+        "profile": "reused",
+        "ms": 1848.0
+      }
+    ],
+    "fresh": {
+      "n": 1,
+      "median_ms": 3831.7,
+      "p95_ms": 3831.7,
+      "min_ms": 3831.7,
+      "max_ms": 3831.7
+    },
+    "reused": {
+      "n": 6,
+      "median_ms": 2213.2,
+      "p95_ms": 8814.3,
+      "min_ms": 1848.0,
+      "max_ms": 8814.3
+    }
+  }
+}

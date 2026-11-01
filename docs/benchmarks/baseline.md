@@ -121,3 +121,44 @@ The project brief sets targets relative to this baseline: startup within +10%
 cold / +5% warm, memory within +5% at 50 tabs, and absolute p95 targets for the
 three latency metrics. Those targets are only meaningful once the first three
 numbers exist, which is why M0 stops here.
+
+## 9. Baseline v0 - Official Zen Twilight (on this Mac)
+
+Measured against Zen Twilight downloaded from `https://github.com/zen-browser/desktop/releases/download/twilight-1/zen.macos-universal.dmg` (universal build). This serves as v0 baseline while our CI build is pending/fixed.
+
+| Property | Value |
+| --- | --- |
+| App | Zen Twilight (official) |
+| Version | 1.25t (as reported) |
+| Machine | MacBook Pro (M-series), macOS 27.2, 8 cores, 8 GB RAM |
+| Power | AC (to be recorded per run) |
+| Notes | Different build profile than our PGO-off build; PGO-on in official builds |
+
+### Startup (pending measurement)
+| Series | n | Median | p95 | Min | Max |
+| --- | --- | --- | --- | --- | --- |
+| Cold (fresh profile) | pending | pending | pending | pending | pending |
+| Warm (reused profile) | pending | pending | pending | pending | pending |
+
+### Memory (pending)
+| Tabs | RSS | Per-tab marginal |
+| --- | --- | --- |
+| 1 | pending | — |
+| 20 | pending | pending |
+| 50 | pending | pending |
+
+## Twilight v0 (measured)
+- Binary: `/Applications/Twilight.app/Contents/MacOS/zen`
+- Archs: `x86_64 arm64` (universal). **Tested: arm64 slice via `arch -arm64` per harness.**
+- Version: Mozilla Zen 1.25t
+- Machine: MacBook Pro (M-series), macOS 27.2
+- Power: Battery Power (88%, discharging)
+- Thermal: no warnings
+- Caveat: **Twilight universal vs our arm64-thin is not a comparison axis; only arm64-slice vs arm64-thin counts.**
+- Raw: `docs/benchmarks/raw/startup-20261101T072611Z.json`, `docs/benchmarks/raw/twilight-v0-metadata.json`
+
+Startup (7 runs):
+- Fresh (n=1): median 3831.7 ms, p95 3831.7, min 3831.7, max 3831.7
+- Warm (n=6): median 2213.2 ms, p95 8814.3, min 1848.0, max 8814.3
+
+Memory/latency to be measured separately.
