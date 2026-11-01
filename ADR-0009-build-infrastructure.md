@@ -12,7 +12,12 @@
 
 ## Decision
 
-**Primary:** GitHub Actions `macos-26` if enabled. **Not viable:** Blacksmith/Depot/larger GitHub runners cannot bypass org-level Actions disablement (they are runner providers for GitHub Actions). **Fallbacks:** non-GitHub CI (Buildkite, CircleCI) or scripted builds on a rented/self-hosted Mac. **No Linux cross-compile for M1** (compile gate only).
+**$0 infrastructure ceiling.** No budget for runners. 
+**Primary (zero-cost):** Create/push to a public repo under a namespace you control (personal account or new org you own). A repo you own has Actions enabled by default for public repos; standard GitHub-hosted runners including macOS are free for public repositories. No org policy, no billing.
+**If you have admin on `BMO-can-code` and can enable it:** use it. If not, mirror becomes primary and old repo becomes read-only upstream.
+**Not viable:** Blacksmith/Depot/larger GitHub runners cannot bypass org-level Actions disablement (they are runner providers for GitHub Actions). Rented Macs, self-hosted paid runners are ruled out permanently due to $0 ceiling.
+**Fallbacks:** non-GitHub CI only if free; otherwise impossible. **No Linux cross-compile for M1** (compile gate only).
+**Constraint:** The repo must be **public** for free macOS minutes. If anyone requires a private repo, the $0 constraint and macOS CI are mutually exclusive.
 
 ## Context
 
